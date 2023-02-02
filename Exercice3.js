@@ -11,9 +11,11 @@ function countNumberInArray(number,array){
 }
 
 function countArrayNumbers(array){
-    let res = array.reduce((prev, cur) => (prev.indexOf(cur) === -1) ? [...prev, cur] : prev, []);
-    return res.map((item)=>countNumberInArray(item,array))
-}
 
+    let res = new Map();
+    let tabreduce = array.reduce((prev, cur) => (prev.indexOf(cur) === -1) ? [...prev, cur] : prev, []);
+    tabreduce.map(item => res.set(item,countNumberInArray(item,array)))
+    return res
+}
 results=countArrayNumbers(data)
 console.log(results)
