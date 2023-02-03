@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        body {
+            width: 50%;
+            max-width: 800px;
+            min-width: 480px;
+            margin: 0 auto;
+        }
+
+        .result {
+            color: palevioletred;
+            padding: 3px;
+        }
+
+        .warning {
+            color: purple;
+            padding: 3px;
+        }
+div.scrollmenu {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+div.scrollmenu .card {
+  display: inline-block;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  margin: 16px;
+  text-align: center;
+  background-color: #f1f1f1;
+  white-space: wrap;
+
+}
+
+
+    </style>
+</head>
+
+<body>
+    <h1>Profil de l'utilisateur</h1>
+    <p>Formulaire de saisie</p>
+    <div class="form">
+    </div>
+    <div id="statistiques">
+        <div id="posts"></div>
+        <div id="todos"></div>
+        <div id="distance"></div>
+    </div>
+    <script>
+        class Personne {
+            constructor(personne){
+                this.address = personne.address
+                this.company = personne.company
+                this.email = personne.email
+                this.id = personne.id
+                this.name = personne.name
+                this.phone = personne.phone
+                this.username = personne.username
+                this.website = personne.website
+            }
+
+            getPerson(){
+                return {"address":this.address,
+                "company":this.company,
+                "email":this.email,
+                "id":this.id,
+                "email":this.name,
+                "phone":this.phone,
+                "username":this.username,
+                "website":this.website}
+            }
+            getAddress(){
+                return this.address
+            }
+            getCompany(){
+                return this.company
+            }
+            getEmail(){
+                return this.email
+            }
+            getId(){
+                return this.id
+            }
+            getName(){
+                return this.name
+            }
+            getPhones(){
+                return this.phone
+            }
+            getUsername(){
+                return this.username
+            }
+            getWebsite(){
+                return this.website
+            }
+
+            setAddress(address){
+                 this.address=address
+            }
+            setCompany(company){
+                 this.company=company
+            }
+            setEmail(email){
+                 this.email=email
+            }
+            setId(id){
+                 this.id=id
+            }
+            setName(name){
+                 this.name=name
+            }
+            setPhones(phone){
+                 this.phone=phone
+            }
+            setUsername(username){
+                 this.username=username
+            }
+            setWebsite(website){
+                 this.website=website
+            }
+
+        }
+
+        class ListClasse {
+            constructor(array=[],id=0){
+                this.list = array
+                this.id = id
+            }
+            add(person){
+                this.list.push(person)
+            }
+            remove(person){
+                this.list.splice(this.list.findIndex(person), 1)
+            }
+            getList(){
+                return [...this.list]
+            }
+            setList(list){
+                this.list = list
+            }
+            getItemById(id){
+                let list = [...this.list]
+                console.log(list,id)
+                return list.filter((item)=>item.id==id)[0]
+            }
+
+            setItemById(id,item){
+                let index = this.list.map(e => e.id).indexOf(id);
+                this.list[index]=item
+            }
+        }
+        class Post {
+            constructor(post){
+                this.id = post.id
+                this.userId= post.userId
+                this.title = post.title
+                this.body = post.body
+                this.button = new Button(this.body,false)
+            }
+
+            getId(){
+                return this.id
+            }
+            getUserId(){
+                return this.userId
+            }
+            getTitle(){
+                return this.title
+            }
+            getBody(){
+                return this.body
+            }
+
+        }
+        class Todos {
+            constructor(todos){
+                this.id = todos.id
+                this.userId= todos.userId
+                this.title = todos.title
+                this.completed = todos.completed
+            }
+
+            getId(){
+                return this.id
+            }
+            getUserId(){
+                return this.userId
+            }
+            getTitle(){
+                return this.title
+            }
+            getCompleted(){
+                return this.completed
+            }
+        }
+        class Button {
+            
+            constructor(text){
+                this.hide = false
+                this.caesarKey = 2
+                this.text = text
+
+            }
+            char_rot(vector,char){
+                return String.fromCharCode((char.charCodeAt(0)+vector))
+            }
+            cesear(vector, text){
+                console.log(vector,text)
+                return text.split('').map((char)=>this.char_rot(vector,char)).join('')
+            }
+            
+            cesearDecode(vector, text){
+                return text.split('').map((char)=>this.char_rot(-vector,char)).join('')
+            }
+            getText(){
+                return this.hide ? this.text: this.cesear(this.caesarKey,this.text)
+            }
+            setHide(hide){
+                this.hide=hide
+            }
+            getHide(){
+                return this.hide
+            }
+            getTextButton(){
+                return this.hide?"Crypter le text":"Décrypter le text"
+            }
+        }
+
+
+        let ListUser = new ListClasse();
+        let ListPost = new ListClasse();
+        let ListTodos = new ListClasse();
+        let ListCommentaireByPosts = new ListClasse();
+        let elInput = document.querySelector('.form');
+        let message = document.querySelector('#statistiques');
+        fetch('https://jsonplaceholder.typicode.com/users')
+                .then((response) => response.json()).then((response)=>{
+                    ListUser.setList(response.map((item)=>{return new Personne(item)}))
+                    console.log(ListUser)
+                    let list = ListUser.getList().map(item=>`<option value="${item.getId()}">${item.getName()}</option>`)
+                    elInput.innerHTML = `<br><label for="user-select">Choisissez une utilisateur:</label><select name="user" id="user-select"><option value=""></option>${list}</select>`
+                    let select = document.querySelector('select[name=user]')
+                    select.addEventListener("change",onselect);
+                });
+        // 1.
+        let value = '';
+
+        function onselect() {
+            let target =document.querySelector('select[name=user]')
+            if(target){
+                let userselected = ListUser.getItemById(target.value)
+                console.log(userselected)
+                if(userselected){
+                    fetch(`https://jsonplaceholder.typicode.com/posts?userId=${userselected.getId()}`).then((response) => response.json()).then((response)=>{
+                        ListPost.setList(response.map((item)=>new Post(item)))
+                        console.log(ListPost)
+                        let postsdiv=message.querySelector('#posts')
+                        postsdiv.innerHTML=`
+        <h2 id="postTitle">Postes</h2><h5 id="subPostTitle"></h5><div id="postword"><p></p><ul><ul></ul></div><div class="scrollmenu" id="postsfill"></div>`
+                        let postTitle = message.querySelector('#subPostTitle')
+                        let postWord = message.querySelector('#postword p')
+                        let postWordul = message.querySelector('#postword ul')
+                        let htmlListPost = message.querySelector('#postsfill')
+                        console.log(postWordul)
+                        Promise.all(ListPost.getList().map((item)=>{return generateCardPost(item)})).then((res) => {
+                            console.log(res)
+                            htmlListPost.innerHTML=res.join(" ");
+                            let initialvalue=0
+                            let moyenne = ListCommentaireByPosts.getList().reduce((accumulator, currentValue)=>accumulator+currentValue.getList().length,initialvalue)/ListCommentaireByPosts.getList().length
+                            postTitle.innerHTML=`Moyenne de commentaires par posts : ${moyenne}`;
+                            let words = ListPost.getList().map((post)=>{return post.body}).join(' ').split(' ')
+                            words =new Map([...countArrayNumbers(words).entries()].sort((a, b) => b[1] - a[1]))
+                            arrayTmp = Array.from(words).slice(0, 10);
+                            let sortWords = new Map(arrayTmp)
+                            let htmlSortWords=""
+                            sortWords.forEach(function(key, index) {
+                                htmlSortWords+= `<li>${index} : ${key} fois</li>`;
+                            });
+                            console.log(htmlSortWords)
+                            postWord.innerHTML="Mots apparaissant le plus :"
+                            postWordul.innerHTML=htmlSortWords
+                            let listButton= htmlListPost.querySelectorAll('button')
+                            listButton=[...listButton]
+                            console.log(listButton)
+                            listButton.forEach(button => {
+                            button.addEventListener('click', onClick)})
+                        })
+                        
+                    })
+                    fetch(`https://jsonplaceholder.typicode.com/todos?userId=${userselected.getId()}`).then((response) => response.json()).then((response)=>{
+                        ListTodos.setList(response.map((item)=>new Todos(item)))
+                        console.log("ici "+userselected.getId(),response,ListTodos)
+                        let todosdiv=message.querySelector('#todos')
+                        todosdiv.innerHTML=`
+        <h2 id="todosTitle">Tâches</h2><ul></ul>`
+                        let htmlTodosul = message.querySelector('#todos ul')
+                        let html =`<li>En cours : ${ListTodos.getList().filter((todo)=>{console.log(todo);if(todo.getCompleted()){return todo}}).length}</li><li>Faites : ${ListTodos.getList().filter((todo)=>{console.log(todo);if(!todo.getCompleted()){return todo}}).length}</li>`
+                        console.log("ici "+userselected.getId(),html)
+                        htmlTodosul.innerHTML= html
+
+                    })
+                    let distancediv=message.querySelector('#distance')
+                        distancediv.innerHTML=`
+        <h2 id="distanceTitle">Utilisateurs les plus proches de vous</h2><ul></ul>`
+                    console.log(ListUser.getList())
+                    let sortuser = [...ListUser.getList()].filter((personne)=>{personne.distance = get_distance_m(userselected.getAddress().geo.lat,userselected.getAddress().geo.lng,personne.getAddress().geo.lat,personne.getAddress().geo.lng);if(personne.id!==userselected.id){return personne}}).sort((a, b) => (a.distance > b.distance) ? 1 : -1)
+                    console.log(sortuser)
+                    let htmldistsul = message.querySelector('#distance ul')
+                    let html =sortuser.map((user)=>{return `<li>${(user.distance/1000).toFixed(2)}km ${user.name}</li>`}).join("")
+                    console.log(html)
+                    htmldistsul.innerHTML=html
+
+
+                }
+            }
+        }
+
+        function countNumberInArray(number,array){
+            return array.filter((item)=>item==number).length
+        }
+
+        function countArrayNumbers(array){
+
+            let res = new Map();
+            let tabreduce = array.reduce((prev, cur) => (prev.indexOf(cur) === -1) ? [...prev, cur] : prev, []);
+            tabreduce.map(item => res.set(item,countNumberInArray(item,array)))
+            return res
+        }
+        //elInput.addEventListener('input', eventInput);
+        function generateCardPost(post){
+            return fetch(`https://jsonplaceholder.typicode.com/comments?postId=${post.id}`).then((response) => response.json()).then((response)=>{
+                ListCommentaireByPosts.add(new ListClasse(response,post.id))
+                console.log(ListCommentaireByPosts,ListCommentaireByPosts.getItemById(post.id),post)
+                return `<div class="card"><h3>${post.getTitle().substr(0,10)+"..."}</h3><h5>${post.getId()}</h5><p id="message${post.getId()}">${post.button.getText().substr(0,10)+"..."}</p><p>${ListCommentaireByPosts.getItemById(post.id).getList().length} Commentaires</p><button id="${post.getId()}">${post.button.getTextButton()}</button></div>`
+            })
+
+        }
+
+        function onClick(event) {
+            let target = event.target.id
+            console.log(event,target)
+            item = ListPost.getItemById(target)
+            item.button.setHide(!item.button.getHide())
+            ListPost.setItemById(target,item)
+            let carPost = message.querySelector(`#message${target}`)
+            carPost.innerHTML =item.button.getText().substr(0,10)+"..."
+            event.target.innerHTML=item.button.getTextButton()
+        }
+        function degrees_to_radians(degrees)
+        {
+            var pi = Math.PI;
+            return degrees * (pi/180);
+        }
+        function get_distance_m($lat1, $lng1, $lat2, $lng2) {
+            $earth_radius = 6378137;   // Terre = sphère de 6378km de rayon
+            $rlo1 = degrees_to_radians($lng1);
+            $rla1 = degrees_to_radians($lat1);
+            $rlo2 = degrees_to_radians($lng2);
+            $rla2 = degrees_to_radians($lat2);
+            $dlo = ($rlo2 - $rlo1) / 2;
+            $dla = ($rla2 - $rla1) / 2;
+            $a = (Math.sin($dla) * Math.sin($dla)) + Math.cos($rla1) * Math.cos($rla2) * (Math.sin($dlo) * Math.sin($dlo));
+            $d = 2 * Math.atan2(Math.sqrt($a), Math.sqrt(1 - $a));
+            return ($earth_radius * $d);
+        }
+
+
+
+    </script>
+</body>
+</html>
